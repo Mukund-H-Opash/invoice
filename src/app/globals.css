@@ -1,0 +1,60 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #0A0A0A;
+  --foreground: #E5E7EB;
+  --primary: #1E3A8A;
+  --accent: #4CAF50;
+  --error: #f44336;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0A0A0A;
+    --foreground: #E5E7EB;
+  }
+}
+@font-face {
+  font-family: 'Inter';
+  src: url('/Static/Inter-VariableFont_slnt,wght.ttf') format('truetype');
+}
+
+body {
+  color: var(--foreground);
+  background: var(--background);
+  font-family: 'Arial', sans-serif;
+  margin: 0;
+  padding: 0;
+}
+
+.MuiPaper-root {
+  background-color: #1F2937 !important;
+}
+
+.MuiButton-contained {
+  background-color: var(--accent) !important;
+  color: #fff !important;
+}
+
+.MuiButton-contained:hover {
+  background-color: #45a049 !important;
+}
+
+.MuiButton-containedSecondary {
+  background-color: var(--primary) !important;
+  color: #fff !important;
+}
+
+.MuiButton-containedSecondary:hover {
+  background-color: #152e63 !important;
+}
+
+.MuiInputBase-input, .MuiInputLabel-root {
+  color: #E5E7EB !important;
+}
+
+.MuiOutlinedInput-root {
+  bgcolor: #374151 !important;
+}

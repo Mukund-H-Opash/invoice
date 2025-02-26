@@ -1,0 +1,146 @@
+{
+  "invoices": [
+    {
+      "id": "INV-001",
+      "companyName": "Opash Solutions",
+      "name": "Nick Johnson",
+      "addressOfShipment": "123 Elm St, Springfield, IL",
+      "lineItems": [
+        {
+          "description": "Website Development",
+          "quantity": 1,
+          "rate": 500
+        },
+        {
+          "description": "Hosting Fee",
+          "quantity": 1,
+          "rate": 50
+        }
+      ],
+      "notes": "Please pay within 15 days.",
+      "subtotal": 550,
+      "tax": 10,
+      "discount": 20,
+      "shipping": 15,
+      "total": 600,
+      "amountPaid": 300,
+      "balanceDue": 300,
+      "date": "2025-02-26T12:36:30.505Z"
+    },
+    {
+      "id": "INV-002",
+      "companyName": "TechTrend Innovations",
+      "name": "Sarah Lee",
+      "addressOfShipment": "456 Oak Ave, Chicago, IL",
+      "lineItems": [
+        {
+          "description": "Mobile App Design",
+          "quantity": 2,
+          "rate": 300
+        }
+      ],
+      "notes": "Includes 1-month support.",
+      "subtotal": 600,
+      "tax": 5,
+      "discount": 0,
+      "shipping": 10,
+      "total": 640,
+      "amountPaid": 640,
+      "balanceDue": 0,
+      "date": "2025-02-25T09:15:22.123Z"
+    },
+    {
+      "id": "INV-003",
+      "companyName": "Opash Solutions",
+      "name": "Mike Brown",
+      "addressOfShipment": "789 Pine Rd, Austin, TX",
+      "lineItems": [
+        {
+          "description": "SEO Services",
+          "quantity": 3,
+          "rate": 150
+        }
+      ],
+      "notes": "",
+      "subtotal": 450,
+      "tax": 8,
+      "discount": 50,
+      "shipping": 0,
+      "total": 436,
+      "amountPaid": 0,
+      "balanceDue": 436,
+      "date": "2025-02-24T14:45:00.000Z"
+    },
+    {
+      "id": "INV-004",
+      "companyName": "Bright Future Co.",
+      "name": "Emily Davis",
+      "addressOfShipment": "321 Birch Ln, Seattle, WA",
+      "lineItems": [
+        {
+          "description": "Graphic Design",
+          "quantity": 1,
+          "rate": 200
+        },
+        {
+          "description": "Printing",
+          "quantity": 10,
+          "rate": 20
+        }
+      ],
+      "notes": "Urgent delivery requested.",
+      "subtotal": 400,
+      "tax": 0,
+      "discount": 10,
+      "shipping": 25,
+      "total": 415,
+      "amountPaid": 200,
+      "balanceDue": 215,
+      "date": "2025-02-23T08:30:15.789Z"
+    },
+    {
+      "id": "INV-005",
+      "companyName": "Opash Solutions",
+      "name": "Alex Carter",
+      "addressOfShipment": "654 Cedar St, Denver, CO",
+      "lineItems": [
+        {
+          "description": "Consulting Session",
+          "quantity": 5,
+          "rate": 100
+        }
+      ],
+      "notes": "Payment due upon receipt.",
+      "subtotal": 500,
+      "tax": 15,
+      "discount": 0,
+      "shipping": 5,
+      "total": 580,
+      "amountPaid": 500,
+      "balanceDue": 80,
+      "date": "2025-02-22T16:20:45.234Z"
+    },
+    {
+      "id": "INV-006",
+      "companyName": "GreenTech Ltd.",
+      "name": "Linda White",
+      "addressOfShipment": "987 Maple Dr, Miami, FL",
+      "lineItems": [
+        {
+          "description": "Hardware Installation",
+          "quantity": 1,
+          "rate": 800
+        }
+      ],
+      "notes": "Contact for installation schedule.",
+      "subtotal": 800,
+      "tax": 7,
+      "discount": 100,
+      "shipping": 50,
+      "total": 806,
+      "amountPaid": 400,
+      "balanceDue": 406,
+      "date": "2025-02-21T11:10:30.567Z"
+    }
+  ]
+}
