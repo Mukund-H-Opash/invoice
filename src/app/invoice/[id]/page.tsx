@@ -1,174 +1,219 @@
+
 'use client';
-import { useEffect, useState } from 'react';
-import { Box, Typography, Button, Divider, Paper, TextField, Grid } from '@mui/material';
-import { useRouter, useParams } from 'next/navigation'; // No need for `use` import from React
-import { fetchInvoices } from '../../../utils/api';
-import { Invoice, LineItem } from '@/types';
-import Navbar from '../../../components/Navbar';
+import { useSelector } from 'react-redux';
+import { RootState } from '@/redux/store';
+import { useRouter } from 'next/navigation';
+import { Box, Typography, Grid, Paper, Button, Divider } from '@mui/material';
+import { motion } from 'framer-motion';
+import Navbar from '@/components/Navbar';
+import { use } from 'react';
 
-export default function InvoiceDetails() {
-  // Use useParams to get params, which returns a plain object
-  const params = useParams();
-  const [invoice, setInvoice] = useState<Invoice | null>(null);
+interface Item {
+  item: string;
+  quantity: number;
+  rate: number;
+  amount: number;
+}
+
+export default function InvoiceDetails({ params }: { params: Promise<{ id: string }> }) {
   const router = useRouter();
+  const { id } = use(params);
+  const invoice = useSelector((state: RootState) =>
+    state.invoices.invoices.find((inv) => inv.id === id)
+  );
 
-  // Safely access id from params, with type checking
-  const id = params?.id ? String(params.id) : null;
+  if (!invoice) {
+    return (
+      <>
+        <Navbar />
+        <Box
+          sx={{
+            minHeight: 'calc(100vh - 64px)',
+            background: 'linear-gradient(45deg, #1E3A8A, #7C3AED, #DB2777)',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            p: 4,
+            borderRadius: '12px',
+          }}
+        >
+          <Typography
+            variant="h5"
+            sx={{ color: '#E5E7EB', textAlign: 'center' }}
+          >
+            Invoice not found.
+          </Typography>
+        </Box>
+      </>
+    );
+  }
 
-  // If id is null or undefined, show loading or error state
-  if (!id) return <Typography>Error: Invalid invoice ID</Typography>;
-
-  useEffect(() => {
-    const loadInvoice = async () => {
-      const invoices = await fetchInvoices();
-      const foundInvoice = invoices.find((inv: Invoice) => inv.id === Number(id));
-      setInvoice(foundInvoice || null);
-    };
-    loadInvoice();
-  }, [id]); // Use id from params
-
-  if (!invoice) return <Typography>Loading...</Typography>;
-
-  const calculateTotalAmount = (invoice: Invoice): number => {
-    return invoice.lineItems.reduce((sum, item) => sum + (item.quantity * item.rate), 0);
-  };
+  const { customerName, items, total, dueDate, date } = invoice;
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', bgcolor: '#0A0A0A', p: 2 }}>
+    <>
       <Navbar />
-      <Paper sx={{ p: 4, mt: 2, bgcolor: '#1F2937', borderRadius: 2, boxShadow: 1, maxWidth: '800px', mx: 'auto', color: '#E5E7EB' }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
-          <Box sx={{ flex: 1, textAlign: 'right' }}>
-            <Typography variant="h4" sx={{ color: '#4CAF50' }}>INVOICE</Typography>
-            <Typography variant="h6" sx={{ color: '#E5E7EB' }}># {invoice.id}</Typography>
-          </Box>
-        </Box>
-
-        <Grid container spacing={2} sx={{ mb: 4 }}>
-          <Grid item xs={12} md={6}>
-            <TextField
-              fullWidth
-              label="Who is this from?"
-              value={invoice.from}
-              disabled
-              variant="outlined"
-              sx={{ bgcolor: '#374151', color: '#E5E7EB', '& .MuiInputBase-input': { color: '#E5E7EB' }, '& .MuiInputLabel-root': { color: '#A0AEC0' } }}
-            />
-            <TextField
-              fullWidth
-              label="Bill To"
-              value={invoice.billTo}
-              disabled
-              variant="outlined"
-              sx={{ bgcolor: '#374151', color: '#E5E7EB', mt: 2, '& .MuiInputBase-input': { color: '#E5E7EB' }, '& .MuiInputLabel-root': { color: '#A0AEC0' } }}
-            />
-            <TextField
-              fullWidth
-              label="Ship To (optional)"
-              value={invoice.shipTo || ''}
-              disabled
-              variant="outlined"
-              sx={{ bgcolor: '#374151', color: '#E5E7EB', mt: 2, '& .MuiInputBase-input': { color: '#E5E7EB' }, '& .MuiInputLabel-root': { color: '#A0AEC0' } }}
-            />
-          </Grid>
-          <Grid item xs={12} md={6}>
-            <TextField
-              fullWidth
-              label="Date"
-              value={new Date(invoice.date).toLocaleDateString()}
-              disabled
-              variant="outlined"
-              sx={{ bgcolor: '#374151', color: '#E5E7EB', '& .MuiInputBase-input': { color: '#E5E7EB' }, '& .MuiInputLabel-root': { color: '#A0AEC0' } }}
-            />
-            <TextField
-              fullWidth
-              label="Payment Terms"
-              value={invoice.paymentTerms}
-              disabled
-              variant="outlined"
-              sx={{ bgcolor: '#374151', color: '#E5E7EB', mt: 2, '& .MuiInputBase-input': { color: '#E5E7EB' }, '& .MuiInputLabel-root': { color: '#A0AEC0' } }}
-            />
-            <TextField
-              fullWidth
-              label="Due Date"
-              value={invoice.dueDate}
-              disabled
-              variant="outlined"
-              sx={{ bgcolor: '#374151', color: '#E5E7EB', mt: 2, '& .MuiInputBase-input': { color: '#E5E7EB' }, '& .MuiInputLabel-root': { color: '#A0AEC0' } }}
-            />
-            <TextField
-              fullWidth
-              label="PO Number (optional)"
-              value={invoice.poNumber || ''}
-              disabled
-              variant="outlined"
-              sx={{ bgcolor: '#374151', color: '#E5E7EB', mt: 2, '& .MuiInputBase-input': { color: '#E5E7EB' }, '& .MuiInputLabel-root': { color: '#A0AEC0' } }}
-            />
-          </Grid>
-        </Grid>
-
-        <Divider sx={{ mb: 4, borderColor: '#4A5568' }} />
-
-        <Box sx={{ mb: 4 }}>
-          <Box sx={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr', bgcolor: '#1E3A8A', color: '#E5E7EB', p: 2, borderRadius: 1 }}>
-            <Typography>Item</Typography>
-            <Typography>Quantity</Typography>
-            <Typography>Rate</Typography>
-            <Typography>Amount</Typography>
-          </Box>
-          {invoice.lineItems.map((item, index) => (
-            <Box key={index} sx={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr', p: 2, borderBottom: '1px solid #4A5568', color: '#E5E7EB' }}>
-              <Typography>{item.description || 'Service Provided'}</Typography>
-              <Typography>{item.quantity}</Typography>
-              <Typography>${item.rate}</Typography>
-              <Typography>${item.amount || (item.quantity * item.rate)}</Typography>
-            </Box>
-          ))}
-        </Box>
-
-        <TextField
-          fullWidth
-          label="Notes - any relevant information not already covered"
-          value={invoice.notes || ''}
-          disabled
-          multiline
-          rows={4}
-          variant="outlined"
-          sx={{ bgcolor: '#374151', color: '#E5E7EB', mb: 2, '& .MuiInputBase-input': { color: '#E5E7EB' }, '& .MuiInputLabel-root': { color: '#A0AEC0' } }}
-        />
-
-        <TextField
-          fullWidth
-          label="Terms and conditions - late fees, payment methods, delivery schedule"
-          value={invoice.terms || ''}
-          disabled
-          multiline
-          rows={4}
-          variant="outlined"
-          sx={{ bgcolor: '#374151', color: '#E5E7EB', mb: 2, '& .MuiInputBase-input': { color: '#E5E7EB' }, '& .MuiInputLabel-root': { color: '#A0AEC0' } }}
-        />
-
-        <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2, mb: 4, color: '#E5E7EB' }}>
-          <Typography>Subtotal: ${invoice.subtotal.toFixed(2)}</Typography>
-          <Typography>Tax: ${((invoice.subtotal * (invoice.tax / 100)) || 0).toFixed(2)}</Typography>
-          <Typography>Discount: ${invoice.discount.toFixed(2)}</Typography>
-          <Typography>Shipping: ${invoice.shipping.toFixed(2)}</Typography>
-          <Typography>Total: ${invoice.total.toFixed(2)}</Typography>
-        </Box>
-
-        <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2, mb: 4, color: '#E5E7EB' }}>
-          <Typography>Amount Paid: ${invoice.amountPaid.toFixed(2)}</Typography>
-          <Typography>Balance Due: ${invoice.balanceDue.toFixed(2)}</Typography>
-        </Box>
-
-        <Button
-          variant="contained"
-          sx={{ backgroundColor: '#4CAF50', '&:hover': { backgroundColor: '#45a049' }, mt: 2 }}
-          onClick={() => navigator.clipboard.writeText(window.location.href)}
+      <Box
+        sx={{
+          minHeight: 'calc(100vh - 64px)',
+          background: 'linear-gradient(45deg, #1E3A8A, #7C3AED, #DB2777)',
+          p: 4,
+          borderRadius: '12px',
+        }}
+      >
+        <Paper
+          component={motion.div}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          sx={{
+            maxWidth: '900px',
+            mx: 'auto',
+            p: 4,
+            background: 'rgba(255, 255, 255, 0.98)',
+            borderRadius: '12px',
+            boxShadow: '0px 8px 30px rgba(0, 0, 0, 0.2)',
+          }}
         >
-          Share Invoice
-        </Button>
-      </Paper>
-    </Box>
+          {/* Header */}
+          <Typography
+            variant="h4"
+            sx={{
+              fontWeight: 'bold',
+              color: '#1E3A8A',
+              textAlign: 'center',
+              mb: 3,
+            }}
+          >
+            Invoice #{id}
+          </Typography>
+
+          {/* Customer Info */}
+          <Grid container spacing={2} sx={{ mb: 4 }}>
+            <Grid item xs={12} sm={6}>
+              <Typography variant="subtitle1" sx={{ fontWeight: 'medium', color: '#6B7280' }}>
+                Customer Name:
+              </Typography>
+              <Typography sx={{ color: '#1E3A8A' }}>{customerName}</Typography>
+            </Grid>
+            <Grid item xs={12} sm={6} sx={{ textAlign: { sm: 'right' } }}>
+              <Typography variant="subtitle1" sx={{ fontWeight: 'medium', color: '#6B7280' }}>
+                Date:
+              </Typography>
+              <Typography sx={{ color: '#1E3A8A' }}>{date}</Typography>
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <Typography variant="subtitle1" sx={{ fontWeight: 'medium', color: '#6B7280' }}>
+                Due Date:
+              </Typography>
+              <Typography sx={{ color: '#1E3A8A' }}>{dueDate}</Typography>
+            </Grid>
+          </Grid>
+
+          {/* Items */}
+          <Typography variant="h6" sx={{ fontWeight: 'medium', color: '#1E3A8A', mb: 2 }}>
+            Items
+          </Typography>
+          <Box sx={{ mb: 4 }}>
+            {items.length === 0 ? (
+              <Grid container spacing={2} sx={{ py: 1 }}>
+                <Grid item xs={5}>
+                  <Typography sx={{ color: '#6B7280' }}>-</Typography>
+                </Grid>
+                <Grid item xs={2} sx={{ textAlign: 'center' }}>
+                  <Typography sx={{ color: '#6B7280' }}>0</Typography>
+                </Grid>
+                <Grid item xs={2} sx={{ textAlign: 'center' }}>
+                  <Typography sx={{ color: '#6B7280' }}>$0.00</Typography>
+                </Grid>
+                <Grid item xs={3} sx={{ textAlign: 'right' }}>
+                  <Typography sx={{ color: '#6B7280' }}>$0.00</Typography>
+                </Grid>
+              </Grid>
+            ) : (
+              items.map((item, index) => (
+                <Grid container spacing={2} key={index} sx={{ py: 1 }}>
+                  <Grid item xs={5}>
+                    <Typography sx={{ color: '#6B7280' }}>{item.item}</Typography>
+                  </Grid>
+                  <Grid item xs={2} sx={{ textAlign: 'center' }}>
+                    <Typography sx={{ color: '#6B7280' }}>{item.quantity}</Typography>
+                  </Grid>
+                  <Grid item xs={2} sx={{ textAlign: 'center' }}>
+                    <Typography sx={{ color: '#6B7280' }}>${item.rate.toFixed(2)}</Typography>
+                  </Grid>
+                  <Grid item xs={3} sx={{ textAlign: 'right' }}>
+                    <Typography sx={{ color: '#6B7280' }}>${item.amount.toFixed(2)}</Typography>
+                  </Grid>
+                  {index < items.length - 1 && <Divider sx={{ width: '100%', my: 1 }} />}
+                </Grid>
+              ))
+            )}
+          </Box>
+
+          {/* Totals */}
+          <Box sx={{ maxWidth: 400, ml: 'auto' }}>
+            <Grid container spacing={2}>
+              <Grid item xs={6}>
+                <Typography sx={{ color: '#6B7280' }}>Subtotal:</Typography>
+              </Grid>
+              <Grid item xs={6} sx={{ textAlign: 'right' }}>
+                <Typography sx={{ color: '#1E3A8A' }}>
+                  ${items.reduce((sum, item) => sum + item.amount, 0).toFixed(2)}
+                </Typography>
+              </Grid>
+              <Grid item xs={12} sx={{ mt: 2 }}>
+                <Divider sx={{ mb: 2 }} />
+                <Typography
+                  variant="h5"
+                  sx={{ fontWeight: 'bold', color: '#1E3A8A', textAlign: 'right' }}
+                >
+                  Total: ${total.toFixed(2)}
+                </Typography>
+              </Grid>
+            </Grid>
+          </Box>
+
+          {/* Actions */}
+          <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2, mt: 4 }}>
+            <Button
+              component={motion.button}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              variant="outlined"
+              onClick={() => router.push('/all-invoices')}
+              sx={{
+                borderColor: '#F59E0B',
+                color: '#F59E0B',
+                borderRadius: '8px',
+                padding: '8px 24px',
+                textTransform: 'uppercase',
+                '&:hover': { borderColor: '#D97706', color: '#D97706' },
+              }}
+            >
+              Back to All Invoices
+            </Button>
+            <Button
+              component={motion.button}
+              whileHover={{ scale: 1.05, boxShadow: '0px 8px 20px rgba(0, 0, 0, 0.3)' }}
+              whileTap={{ scale: 0.95 }}
+              variant="contained"
+              onClick={() => router.push(`/create-invoice?edit=${id}`)}
+              sx={{
+                background: 'linear-gradient(90deg, #EF4444, #F59E0B)', // Reversed gradient for contrast
+                color: '#fff',
+                fontWeight: 'bold',
+                borderRadius: '8px',
+                padding: '8px 24px',
+                textTransform: 'uppercase',
+                '&:hover': { background: 'linear-gradient(90deg, #DC2626, #D97706)' },
+              }}
+            >
+              Edit Invoice
+            </Button>
+          </Box>
+        </Paper>
+      </Box>
+    </>
   );
 }

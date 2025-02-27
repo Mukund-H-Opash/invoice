@@ -16,11 +16,13 @@
     "@mui/material": "^6.4.5",
     "@reduxjs/toolkit": "^2.6.0",
     "axios": "^1.8.0",
+    "framer-motion": "^12.4.7",
     "next": "15.1.7",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-redux": "^9.2.0",
-    "react-to-print": "^3.0.5"
+    "react-to-print": "^3.0.5",
+    "react-toastify": "^11.0.5"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",

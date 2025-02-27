@@ -1,289 +1,904 @@
-import { useState } from 'react';
-import { Button, TextField, MenuItem, Box, IconButton, Typography } from '@mui/material';
-import AddIcon from '@mui/icons-material/Add';
-import DeleteIcon from '@mui/icons-material/Delete';
-import { Invoice, LineItem } from '../types';
 
-interface InvoiceFormProps {
-  onSubmit: (invoice: Invoice) => void;
-  initialData?: Invoice | null;
+// 'use client';
+// import React, { useState, useEffect } from 'react';
+// import { Box, TextField, Button, Typography, Grid } from '@mui/material';
+// import { motion } from 'framer-motion';
+// import { useDispatch } from 'react-redux';
+// import { addInvoice, updateInvoice } from '@/redux/invoiceSlice';
+// import { saveInvoice, updateInvoice as updateApiInvoice } from '@/utils/api';
+// import { toast } from 'react-toastify';
+
+// interface Item {
+//   item: string;
+//   quantity: number;
+//   rate: number;
+//   amount: number;
+// }
+
+// interface InvoiceFormProps {
+//   editInvoice?: {
+//     id: string;
+//     customerName: string;
+//     shippingAddress: string;
+//     items: Item[];
+//     discount: number;
+//     tax: number;
+//     shippingCharge: number;
+//     total: number;
+//     dueDate: string;
+//     date: string;
+//   };
+//   onSave?: () => void;
+// }
+
+// const InvoiceForm: React.FC<InvoiceFormProps> = ({ editInvoice, onSave }) => {
+//   const dispatch = useDispatch();
+
+//   const [formData, setFormData] = useState({
+//     customerName: editInvoice?.customerName || '',
+//     shippingAddress: editInvoice?.shippingAddress || '',
+//     dueDate: editInvoice?.dueDate || new Date().toLocaleDateString('en-GB'),
+//   });
+//   const [items, setItems] = useState<Item[]>(
+//     editInvoice?.items || [{ item: '', quantity: 0, rate: 0, amount: 0 }]
+//   );
+//   const [discount, setDiscount] = useState(editInvoice?.discount || 0);
+//   const [tax, setTax] = useState(editInvoice?.tax || 0);
+//   const [shippingCharge, setShippingCharge] = useState(
+//     editInvoice?.shippingCharge || 0
+//   );
+
+//   useEffect(() => {
+//     if (editInvoice) {
+//       setFormData({
+//         customerName: editInvoice.customerName,
+//         shippingAddress: editInvoice.shippingAddress,
+//         dueDate: editInvoice.dueDate,
+//       });
+//       setItems(editInvoice.items);
+//       setDiscount(editInvoice.discount);
+//       setTax(editInvoice.tax);
+//       setShippingCharge(editInvoice.shippingCharge);
+//     }
+//   }, [editInvoice]);
+
+//   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+//     const { name, value } = e.target;
+//     setFormData((prev) => ({ ...prev, [name]: value }));
+//   };
+
+//   const handleItemChange = (index: number, field: keyof Item, value: string | number) => {
+//     const newItems = [...items];
+//     newItems[index] = { ...newItems[index], [field]: value };
+//     if (field === 'quantity' || field === 'rate') {
+//       newItems[index].amount =
+//         (Number(newItems[index].quantity) || 0) * (Number(newItems[index].rate) || 0);
+//     }
+//     setItems(newItems);
+//   };
+
+//   const addItemRow = () => {
+//     setItems([...items, { item: '', quantity: 0, rate: 0, amount: 0 }]);
+//   };
+
+//   const subtotal = items.reduce((sum, item) => sum + item.amount, 0);
+//   const taxAmount = subtotal * (tax / 100);
+//   const total = subtotal - discount + taxAmount + (formData.shippingAddress ? shippingCharge : 0);
+
+//   const handleSave = async () => {
+//     const invoiceData = {
+//       id: editInvoice?.id || Date.now().toString().slice(-4),
+//       customerName: formData.customerName,
+//       shippingAddress: formData.shippingAddress,
+//       items,
+//       discount,
+//       tax,
+//       shippingCharge,
+//       total,
+//       amount: total.toString(),
+//       dueDate: formData.dueDate,
+//       date: new Date().toLocaleDateString('en-GB'),
+//     };
+
+//     try {
+//       if (editInvoice) {
+//         dispatch(updateInvoice(invoiceData));
+//         await updateApiInvoice(editInvoice.id, invoiceData); // Pass all fields
+//         toast.success('Invoice updated successfully!');
+//       } else {
+//         dispatch(addInvoice(invoiceData));
+//         await saveInvoice(invoiceData); // Pass all fields
+//         toast.success('Invoice created successfully!');
+//       }
+//       onSave?.();
+//       if (!editInvoice) {
+//         setFormData({ customerName: '', shippingAddress: '', dueDate: new Date().toLocaleDateString('en-GB') });
+//         setItems([{ item: '', quantity: 0, rate: 0, amount: 0 }]);
+//         setDiscount(0);
+//         setTax(0);
+//         setShippingCharge(0);
+//       }
+//     } catch (error) {
+//       toast.error('Failed to save invoice!');
+//       console.error('Error saving invoice:', error);
+//     }
+//   };
+
+//   return (
+//     <Box
+//       sx={{
+//         p: 4,
+//         background: 'linear-gradient(135deg, #6D28D9, #A855F7, #EC4899)',
+//         borderRadius: '12px',
+//         boxShadow: '0px 8px 30px rgba(0, 0, 0, 0.2)',
+//         color: '#fff',
+//         maxWidth: '900px',
+//         mx: 'auto',
+//         my: 4,
+//       }}
+//     >
+//       <Typography
+//         variant="h4"
+//         sx={{
+//           fontWeight: 'bold',
+//           textAlign: 'center',
+//           mb: 4,
+//           textShadow: '1px 1px 5px rgba(0, 0, 0, 0.3)',
+//         }}
+//       >
+//         {editInvoice ? 'Edit Invoice' : 'Create New Invoice'}
+//       </Typography>
+
+//       <Grid container spacing={3} sx={{ mb: 4 }}>
+//         <Grid item xs={12} md={6}>
+//           <TextField
+//             fullWidth
+//             label="Customer Name"
+//             name="customerName"
+//             value={formData.customerName}
+//             onChange={handleChange}
+//             variant="outlined"
+//             sx={{
+//               background: 'rgba(255, 255, 255, 0.9)',
+//               borderRadius: '8px',
+//               '& .MuiOutlinedInput-root': {
+//                 '& fieldset': { border: 'none' },
+//                 '&:hover fieldset': { border: 'none' },
+//                 '&.Mui-focused fieldset': { border: 'none' },
+//               },
+//               '& .MuiInputLabel-root': { color: 'rgba(0, 0, 0, 0.6)' },
+//             }}
+//           />
+//         </Grid>
+//         <Grid item xs={12} md={6}>
+//           <TextField
+//             fullWidth
+//             label="Shipping Address (Optional)"
+//             name="shippingAddress"
+//             value={formData.shippingAddress}
+//             onChange={handleChange}
+//             variant="outlined"
+//             sx={{
+//               background: 'rgba(255, 255, 255, 0.9)',
+//               borderRadius: '8px',
+//               '& .MuiOutlinedInput-root': {
+//                 '& fieldset': { border: 'none' },
+//                 '&:hover fieldset': { border: 'none' },
+//                 '&.Mui-focused fieldset': { border: 'none' },
+//               },
+//               '& .MuiInputLabel-root': { color: 'rgba(0, 0, 0, 0.6)' },
+//             }}
+//           />
+//         </Grid>
+//         <Grid item xs={12} md={6}>
+//           <TextField
+//             fullWidth
+//             label="Due Date"
+//             name="dueDate"
+//             value={formData.dueDate}
+//             onChange={handleChange}
+//             variant="outlined"
+//             sx={{
+//               background: 'rgba(255, 255, 255, 0.9)',
+//               borderRadius: '8px',
+//               '& .MuiOutlinedInput-root': {
+//                 '& fieldset': { border: 'none' },
+//                 '&:hover fieldset': { border: 'none' },
+//                 '&.Mui-focused fieldset': { border: 'none' },
+//               },
+//               '& .MuiInputLabel-root': { color: 'rgba(0, 0, 0, 0.6)' },
+//             }}
+//           />
+//         </Grid>
+//       </Grid>
+
+//       <Box sx={{ mb: 4 }}>
+//         <Typography variant="h6" sx={{ fontWeight: 'medium', mb: 2 }}>
+//           Items
+//         </Typography>
+//         {items.map((item, index) => (
+//           <Grid container spacing={2} key={index} sx={{ mb: 2 }}>
+//             <Grid item xs={12} sm={5}>
+//               <TextField
+//                 fullWidth
+//                 label="Item Description"
+//                 value={item.item}
+//                 onChange={(e) => handleItemChange(index, 'item', e.target.value)}
+//                 variant="outlined"
+//                 sx={{
+//                   background: 'rgba(255, 255, 255, 0.9)',
+//                   borderRadius: '8px',
+//                   '& .MuiOutlinedInput-root': {
+//                     '& fieldset': { border: 'none' },
+//                     '&:hover fieldset': { border: 'none' },
+//                     '&.Mui-focused fieldset': { border: 'none' },
+//                   },
+//                 }}
+//               />
+//             </Grid>
+//             <Grid item xs={6} sm={2}>
+//               <TextField
+//                 fullWidth
+//                 type="number"
+//                 label="Quantity"
+//                 value={item.quantity}
+//                 onChange={(e) => handleItemChange(index, 'quantity', Number(e.target.value))}
+//                 variant="outlined"
+//                 sx={{
+//                   background: 'rgba(255, 255, 255, 0.9)',
+//                   borderRadius: '8px',
+//                   '& .MuiOutlinedInput-root': {
+//                     '& fieldset': { border: 'none' },
+//                     '&:hover fieldset': { border: 'none' },
+//                     '&.Mui-focused fieldset': { border: 'none' },
+//                   },
+//                 }}
+//               />
+//             </Grid>
+//             <Grid item xs={6} sm={2}>
+//               <TextField
+//                 fullWidth
+//                 type="number"
+//                 label="Rate"
+//                 value={item.rate}
+//                 onChange={(e) => handleItemChange(index, 'rate', Number(e.target.value))}
+//                 variant="outlined"
+//                 sx={{
+//                   background: 'rgba(255, 255, 255, 0.9)',
+//                   borderRadius: '8px',
+//                   '& .MuiOutlinedInput-root': {
+//                     '& fieldset': { border: 'none' },
+//                     '&:hover fieldset': { border: 'none' },
+//                     '&.Mui-focused fieldset': { border: 'none' },
+//                   },
+//                 }}
+//               />
+//             </Grid>
+//             <Grid item xs={12} sm={3}>
+//               <TextField
+//                 fullWidth
+//                 label="Amount"
+//                 value={item.amount.toFixed(2)}
+//                 disabled
+//                 variant="outlined"
+//                 sx={{
+//                   background: 'rgba(255, 255, 255, 0.9)',
+//                   borderRadius: '8px',
+//                   '& .MuiOutlinedInput-root': {
+//                     '& fieldset': { border: 'none' },
+//                     '&:hover fieldset': { border: 'none' },
+//                     '&.Mui-focused fieldset': { border: 'none' },
+//                   },
+//                 }}
+//               />
+//             </Grid>
+//           </Grid>
+//         ))}
+//         <Button
+//           component={motion.button}
+//           whileHover={{ scale: 1.05 }}
+//           whileTap={{ scale: 0.95 }}
+//           variant="outlined"
+//           onClick={addItemRow}
+//           sx={{
+//             mt: 2,
+//             borderColor: '#fff',
+//             color: '#fff',
+//             borderRadius: '8px',
+//             padding: '8px 24px',
+//             '&:hover': {
+//               borderColor: '#fff',
+//               background: 'rgba(255, 255, 255, 0.1)',
+//             },
+//           }}
+//         >
+//           + Add Item
+//         </Button>
+//       </Box>
+
+//       <Box sx={{ maxWidth: 400, ml: 'auto' }}>
+//         <Grid container spacing={2} sx={{ mb: 2 }}>
+//           <Grid item xs={12}>
+//             <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
+//               Invoice # {editInvoice?.id || Date.now().toString().slice(-4)}
+//             </Typography>
+//             <Typography variant="body2" sx={{ color: 'rgba(255, 255, 255, 0.8)' }}>
+//               Date: {new Date().toLocaleDateString('en-GB')}
+//             </Typography>
+//           </Grid>
+//         </Grid>
+
+//         <Grid container spacing={2}>
+//           <Grid item xs={6}>
+//             <Typography>Subtotal:</Typography>
+//           </Grid>
+//           <Grid item xs={6} sx={{ textAlign: 'right' }}>
+//             <Typography>${subtotal.toFixed(2)}</Typography>
+//           </Grid>
+
+//           <Grid item xs={6}>
+//             <TextField
+//               label="Discount ($)"
+//               type="number"
+//               value={discount}
+//               onChange={(e) => setDiscount(Number(e.target.value))}
+//               size="small"
+//               sx={{
+//                 background: 'rgba(255, 255, 255, 0.9)',
+//                 borderRadius: '8px',
+//                 '& .MuiOutlinedInput-root': {
+//                   '& fieldset': { border: 'none' },
+//                   '&:hover fieldset': { border: 'none' },
+//                   '&.Mui-focused fieldset': { border: 'none' },
+//                 },
+//               }}
+//             />
+//           </Grid>
+//           <Grid item xs={6} sx={{ textAlign: 'right' }}>
+//             <Typography>-${discount.toFixed(2)}</Typography>
+//           </Grid>
+
+//           <Grid item xs={6}>
+//             <TextField
+//               label="Tax (%)"
+//               type="number"
+//               value={tax}
+//               onChange={(e) => setTax(Number(e.target.value))}
+//               size="small"
+//               sx={{
+//                 background: 'rgba(255, 255, 255, 0.9)',
+//                 borderRadius: '8px',
+//                 '& .MuiOutlinedInput-root': {
+//                   '& fieldset': { border: 'none' },
+//                   '&:hover fieldset': { border: 'none' },
+//                   '&.Mui-focused fieldset': { border: 'none' },
+//                 },
+//               }}
+//             />
+//           </Grid>
+//           <Grid item xs={6} sx={{ textAlign: 'right' }}>
+//             <Typography>${taxAmount.toFixed(2)}</Typography>
+//           </Grid>
+
+//           {formData.shippingAddress && (
+//             <>
+//               <Grid item xs={6}>
+//                 <TextField
+//                   label="Shipping Charge ($)"
+//                   type="number"
+//                   value={shippingCharge}
+//                   onChange={(e) => setShippingCharge(Number(e.target.value))}
+//                   size="small"
+//                   sx={{
+//                     background: 'rgba(255, 255, 255, 0.9)',
+//                     borderRadius: '8px',
+//                     '& .MuiOutlinedInput-root': {
+//                       '& fieldset': { border: 'none' },
+//                       '&:hover fieldset': { border: 'none' },
+//                       '&.Mui-focused fieldset': { border: 'none' },
+//                     },
+//                   }}
+//                 />
+//               </Grid>
+//               <Grid item xs={6} sx={{ textAlign: 'right' }}>
+//                 <Typography>${shippingCharge.toFixed(2)}</Typography>
+//               </Grid>
+//             </>
+//           )}
+
+//           <Grid item xs={12} sx={{ mt: 2 }}>
+//             <Typography
+//               variant="h5"
+//               sx={{
+//                 fontWeight: 'bold',
+//                 textAlign: 'right',
+//                 textShadow: '1px 1px 3px rgba(0, 0, 0, 0.2)',
+//               }}
+//             >
+//               Total: ${total.toFixed(2)}
+//             </Typography>
+//           </Grid>
+//         </Grid>
+
+//         <Box sx={{ textAlign: 'right', mt: 3 }}>
+//           <Button
+//             component={motion.button}
+//             whileHover={{ scale: 1.05, boxShadow: '0px 8px 20px rgba(0, 0, 0, 0.3)' }}
+//             whileTap={{ scale: 0.95 }}
+//             variant="contained"
+//             onClick={handleSave}
+//             sx={{
+//               background: 'linear-gradient(90deg, #F59E0B, #EF4444)',
+//               color: '#fff',
+//               fontWeight: 'bold',
+//               padding: '10px 30px',
+//               borderRadius: '50px',
+//               boxShadow: '0px 4px 15px rgba(0, 0, 0, 0.2)',
+//               '&:hover': {
+//                 background: 'linear-gradient(90deg, #D97706, #DC2626)',
+//               },
+//             }}
+//           >
+//             {editInvoice ? 'Update Invoice' : 'Create Invoice'}
+//           </Button>
+//         </Box>
+//       </Box>
+//     </Box>
+//   );
+// };
+
+// export default InvoiceForm;
+
+
+'use client';
+import React, { useState, useEffect } from 'react';
+import { Box, TextField, Button, Typography, Grid } from '@mui/material';
+import { motion } from 'framer-motion';
+import { useDispatch } from 'react-redux';
+import { addInvoice, updateInvoice } from '@/redux/invoiceSlice';
+import { saveInvoice, updateInvoice as updateApiInvoice } from '@/utils/api';
+import { toast } from 'react-toastify';
+
+interface Item {
+  item: string;
+  quantity: number;
+  rate: number;
+  amount: number;
 }
 
-export default function InvoiceForm({ onSubmit, initialData }: InvoiceFormProps) {
-  const [formData, setFormData] = useState<Invoice>(
-    initialData || {
-      companyName: '',
-      name: '',
-      from: '',
-      billTo: '',
-      shipTo: '',
-      paymentTerms: 'Due on Receipt',
-      dueDate: new Date().toISOString().split('T')[0],
-      poNumber: '',
-      lineItems: [{ description: '', quantity: 1, rate: 0, amount: 0 }],
-      notes: '',
-      terms: '',
-      subtotal: 0,
-      tax: 0,
-      discount: 0,
-      shipping: 0,
-      total: 0,
-      amountPaid: 0,
-      balanceDue: 0,
-      date: new Date().toISOString().split('T')[0],
-    }
+interface InvoiceFormProps {
+  editInvoice?: {
+    id: string;
+    customerName: string;
+    shippingAddress: string;
+    items: Item[];
+    discount: number;
+    tax: number;
+    shippingCharge: number;
+    total: number;
+    dueDate: string;
+    date: string;
+  };
+  onSave?: () => void;
+}
+
+const InvoiceForm: React.FC<InvoiceFormProps> = ({ editInvoice, onSave }) => {
+  const dispatch = useDispatch();
+
+  const [formData, setFormData] = useState({
+    customerName: editInvoice?.customerName || '',
+    shippingAddress: editInvoice?.shippingAddress || '',
+    dueDate: editInvoice?.dueDate || new Date().toLocaleDateString('en-GB'),
+  });
+  const [items, setItems] = useState<Item[]>(
+    editInvoice?.items || [{ item: '', quantity: 0, rate: 0, amount: 0 }]
   );
+  const [discount, setDiscount] = useState(editInvoice?.discount || 0);
+  const [tax, setTax] = useState(editInvoice?.tax || 0);
+  const [shippingCharge, setShippingCharge] = useState(
+    editInvoice?.shippingCharge || 0
+  );
+
+  useEffect(() => {
+    if (editInvoice) {
+      setFormData({
+        customerName: editInvoice.customerName,
+        shippingAddress: editInvoice.shippingAddress,
+        dueDate: editInvoice.dueDate,
+      });
+      setItems(editInvoice.items);
+      setDiscount(editInvoice.discount);
+      setTax(editInvoice.tax);
+      setShippingCharge(editInvoice.shippingCharge);
+    }
+  }, [editInvoice]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+    // Skip updating customerName in edit mode
+    if (editInvoice && name === 'customerName') return;
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleLineItemChange = (index: number, field: keyof LineItem, value: string | number) => {
-    setFormData((prev) => {
-      const newLineItems = [...prev.lineItems];
-      newLineItems[index] = {
-        ...newLineItems[index],
-        [field]: field === 'description' ? value as string : Number(value),
-      };
-      return calculateTotals({ ...prev, lineItems: newLineItems });
-    });
+  const handleItemChange = (index: number, field: keyof Item, value: string | number) => {
+    const newItems = [...items];
+    newItems[index] = { ...newItems[index], [field]: value };
+    if (field === 'quantity' || field === 'rate') {
+      newItems[index].amount =
+        (Number(newItems[index].quantity) || 0) * (Number(newItems[index].rate) || 0);
+    }
+    setItems(newItems);
   };
 
-  const addLineItem = () => {
-    setFormData((prev) => ({
-      ...prev,
-      lineItems: [...prev.lineItems, { description: '', quantity: 1, rate: 0, amount: 0 }],
-    }));
+  const addItemRow = () => {
+    setItems([...items, { item: '', quantity: 0, rate: 0, amount: 0 }]);
   };
 
-  const removeLineItem = (index: number) => {
-    setFormData((prev) => {
-      const newLineItems = prev.lineItems.filter((_, i) => i !== index);
-      return calculateTotals({ ...prev, lineItems: newLineItems });
-    });
-  };
+  const subtotal = items.reduce((sum, item) => sum + item.amount, 0);
+  const taxAmount = subtotal * (tax / 100);
+  const total = subtotal - discount + taxAmount + (formData.shippingAddress ? shippingCharge : 0);
 
-  const calculateTotals = (invoice: Invoice): Invoice => {
-    const subtotal = invoice.lineItems.reduce((sum, item) => sum + (item.quantity * item.rate), 0);
-    const taxAmount = (subtotal * (invoice.tax / 100)) || 0;
-    const total = subtotal + taxAmount + invoice.shipping - invoice.discount;
-    const balanceDue = total - invoice.amountPaid;
-
-    return {
-      ...invoice,
-      subtotal,
+  const handleSave = async () => {
+    const invoiceData = {
+      id: editInvoice?.id || Date.now().toString().slice(-4),
+      customerName: formData.customerName,
+      shippingAddress: formData.shippingAddress,
+      items,
+      discount,
+      tax,
+      shippingCharge,
       total,
-      balanceDue,
+      amount: total.toString(),
+      dueDate: formData.dueDate,
+      date: new Date().toLocaleDateString('en-GB'),
     };
-  };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    onSubmit(formData); // No logo field anymore
+    try {
+      if (editInvoice) {
+        dispatch(updateInvoice(invoiceData));
+        await updateApiInvoice(editInvoice.id, invoiceData);
+        toast.success('Record updated successfully!');
+      } else {
+        dispatch(addInvoice(invoiceData));
+        await saveInvoice(invoiceData);
+        toast.success('Invoice created successfully!');
+      }
+      onSave?.();
+      if (!editInvoice) {
+        setFormData({ customerName: '', shippingAddress: '', dueDate: new Date().toLocaleDateString('en-GB') });
+        setItems([{ item: '', quantity: 0, rate: 0, amount: 0 }]);
+        setDiscount(0);
+        setTax(0);
+        setShippingCharge(0);
+      }
+    } catch (error) {
+      toast.error('Failed to save invoice!');
+      console.error('Error saving invoice:', error);
+    }
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, p: 2, bgcolor: '#1F2937', borderRadius: 2, boxShadow: 1, color: '#E5E7EB' }}>
-        <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
-          <Box sx={{ flex: 1, textAlign: 'right' }}>
-            <Typography variant="h5" sx={{ color: '#4CAF50' }}>INVOICE</Typography>
-            <TextField
-              fullWidth
-              label="Invoice #"
-              value={formData.id || 1}
-              disabled
-              variant="outlined"
-              sx={{ bgcolor: '#374151', color: '#E5E7EB', mt: 1, '& .MuiInputBase-input': { color: '#E5E7EB' }, '& .MuiInputLabel-root': { color: '#A0AEC0' } }}
-            />
-          </Box>
-        </Box>
+    <Box
+      sx={{
+        p: 4,
+        background: 'linear-gradient(135deg, #6D28D9, #A855F7, #EC4899)',
+        borderRadius: '12px',
+        boxShadow: '0px 8px 30px rgba(0, 0, 0, 0.2)',
+        color: '#fff',
+        maxWidth: '900px',
+        mx: 'auto',
+        my: 4,
+      }}
+    >
+      <Typography
+        variant="h4"
+        sx={{
+          fontWeight: 'bold',
+          textAlign: 'center',
+          mb: 4,
+          textShadow: '1px 1px 5px rgba(0, 0, 0, 0.3)',
+        }}
+      >
+        {editInvoice ? `Update Invoice #${editInvoice.id}` : 'Create New Invoice'}
+      </Typography>
 
-        <TextField
-          label="Company name"
-          name="from"
-          value={formData.from}
-          onChange={handleChange}
-          required
-          variant="outlined"
-          sx={{ bgcolor: '#374151', color: '#E5E7EB', '& .MuiInputBase-input': { color: '#E5E7EB' }, '& .MuiInputLabel-root': { color: '#A0AEC0' } }}
-        />
-        <Box sx={{ display: 'flex', gap: 2 }}>
+      <Grid container spacing={3} sx={{ mb: 4 }}>
+        <Grid item xs={12} md={6}>
           <TextField
-            label="Name"
-            name="billTo"
-            value={formData.billTo}
-            onChange={handleChange}
-            required
-            variant="outlined"
-            sx={{ bgcolor: '#374151', color: '#E5E7EB', flex: 1, '& .MuiInputBase-input': { color: '#E5E7EB' }, '& .MuiInputLabel-root': { color: '#A0AEC0' } }}
-          />
-          <TextField
-            label="Address of shipment (optional)"
-            name="shipTo"
-            value={formData.shipTo || ''}
+            fullWidth
+            label="Customer Name"
+            name="customerName"
+            value={formData.customerName}
             onChange={handleChange}
             variant="outlined"
-            sx={{ bgcolor: '#374151', color: '#E5E7EB', flex: 1, '& .MuiInputBase-input': { color: '#E5E7EB' }, '& .MuiInputLabel-root': { color: '#A0AEC0' } }}
+            disabled={!!editInvoice} // Disable in edit mode
+            sx={{
+              background: 'rgba(255, 255, 255, 0.9)',
+              borderRadius: '8px',
+              '& .MuiOutlinedInput-root': {
+                '& fieldset': { border: 'none' },
+                '&:hover fieldset': { border: 'none' },
+                '&.Mui-focused fieldset': { border: 'none' },
+              },
+              '& .MuiInputLabel-root': { color: 'rgba(0, 0, 0, 0.6)' },
+            }}
           />
-        </Box>
-
-        <Box sx={{ display: 'flex', gap: 2 }}>
+        </Grid>
+        <Grid item xs={12} md={6}>
           <TextField
-            label="Date"
-            name="date"
-            type="date"
-            value={formData.date.split('T')[0]}
+            fullWidth
+            label="Shipping Address (Optional)"
+            name="shippingAddress"
+            value={formData.shippingAddress}
             onChange={handleChange}
-            required
             variant="outlined"
-            sx={{ bgcolor: '#374151', color: '#E5E7EB', flex: 1, '& .MuiInputBase-input': { color: '#E5E7EB' }, '& .MuiInputLabel-root': { color: '#A0AEC0' } }}
+            sx={{
+              background: 'rgba(255, 255, 255, 0.9)',
+              borderRadius: '8px',
+              '& .MuiOutlinedInput-root': {
+                '& fieldset': { border: 'none' },
+                '&:hover fieldset': { border: 'none' },
+                '&.Mui-focused fieldset': { border: 'none' },
+              },
+              '& .MuiInputLabel-root': { color: 'rgba(0, 0, 0, 0.6)' },
+            }}
           />
-          
-        </Box>
+        </Grid>
+        <Grid item xs={12} md={6}>
+          <TextField
+            fullWidth
+            label="Due Date"
+            name="dueDate"
+            value={formData.dueDate}
+            onChange={handleChange}
+            variant="outlined"
+            sx={{
+              background: 'rgba(255, 255, 255, 0.9)',
+              borderRadius: '8px',
+              '& .MuiOutlinedInput-root': {
+                '& fieldset': { border: 'none' },
+                '&:hover fieldset': { border: 'none' },
+                '&.Mui-focused fieldset': { border: 'none' },
+              },
+              '& .MuiInputLabel-root': { color: 'rgba(0, 0, 0, 0.6)' },
+            }}
+          />
+        </Grid>
+      </Grid>
 
-        <Box sx={{ bgcolor: '#1E3A8A', color: '#E5E7EB', p: 2, borderRadius: 1, mb: 2 }}>
-          <Typography variant="subtitle1">Item</Typography>
-        </Box>
-        {formData.lineItems.map((item, index) => (
-          <Box key={index} sx={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr 0.5fr', gap: 2, alignItems: 'center', bgcolor: '#374151', p: 2, borderRadius: 1, color: '#E5E7EB' }}>
-            <TextField
-              label="Description of Item/Service"
-              value={item.description}
-              onChange={(e) => handleLineItemChange(index, 'description', e.target.value)}
-              variant="outlined"
-              sx={{ bgcolor: '#374151', color: '#E5E7EB', '& .MuiInputBase-input': { color: '#E5E7EB' }, '& .MuiInputLabel-root': { color: '#A0AEC0' } }}
-            />
-            <TextField
-              type="number"
-              label="Quantity"
-              value={item.quantity}
-              onChange={(e) => handleLineItemChange(index, 'quantity', e.target.value)}
-              variant="outlined"
-              sx={{ bgcolor: '#374151', color: '#E5E7EB', '& .MuiInputBase-input': { color: '#E5E7EB' }, '& .MuiInputLabel-root': { color: '#A0AEC0' } }}
-            />
-            <TextField
-              type="number"
-              label="Rate"
-              value={item.rate}
-              onChange={(e) => handleLineItemChange(index, 'rate', e.target.value)}
-              variant="outlined"
-              sx={{ bgcolor: '#374151', color: '#E5E7EB', '& .MuiInputBase-input': { color: '#E5E7EB' }, '& .MuiInputLabel-root': { color: '#A0AEC0' } }}
-            />
-            <TextField
-              type="number"
-              label="Amount"
-              value={item.amount || (item.quantity * item.rate)}
-              onChange={(e) => handleLineItemChange(index, 'amount', e.target.value)}
-              variant="outlined"
-              disabled
-              sx={{ bgcolor: '#374151', color: '#E5E7EB', '& .MuiInputBase-input': { color: '#E5E7EB' }, '& .MuiInputLabel-root': { color: '#A0AEC0' } }}
-            />
-            <IconButton onClick={() => removeLineItem(index)} color="error" sx={{ color: '#f44336' }}>
-              <DeleteIcon />
-            </IconButton>
-          </Box>
+      <Box sx={{ mb: 4 }}>
+        <Typography variant="h6" sx={{ fontWeight: 'medium', mb: 2 }}>
+          Items
+        </Typography>
+        {items.map((item, index) => (
+          <Grid container spacing={2} key={index} sx={{ mb: 2 }}>
+            <Grid item xs={12} sm={5}>
+              <TextField
+                fullWidth
+                label="Item Description"
+                value={item.item}
+                onChange={(e) => handleItemChange(index, 'item', e.target.value)}
+                variant="outlined"
+                sx={{
+                  background: 'rgba(255, 255, 255, 0.9)',
+                  borderRadius: '8px',
+                  '& .MuiOutlinedInput-root': {
+                    '& fieldset': { border: 'none' },
+                    '&:hover fieldset': { border: 'none' },
+                    '&.Mui-focused fieldset': { border: 'none' },
+                  },
+                }}
+              />
+            </Grid>
+            <Grid item xs={6} sm={2}>
+              <TextField
+                fullWidth
+                type="number"
+                label="Quantity"
+                value={item.quantity}
+                onChange={(e) => handleItemChange(index, 'quantity', Number(e.target.value))}
+                variant="outlined"
+                sx={{
+                  background: 'rgba(255, 255, 255, 0.9)',
+                  borderRadius: '8px',
+                  '& .MuiOutlinedInput-root': {
+                    '& fieldset': { border: 'none' },
+                    '&:hover fieldset': { border: 'none' },
+                    '&.Mui-focused fieldset': { border: 'none' },
+                  },
+                }}
+              />
+            </Grid>
+            <Grid item xs={6} sm={2}>
+              <TextField
+                fullWidth
+                type="number"
+                label="Rate"
+                value={item.rate}
+                onChange={(e) => handleItemChange(index, 'rate', Number(e.target.value))}
+                variant="outlined"
+                sx={{
+                  background: 'rgba(255, 255, 255, 0.9)',
+                  borderRadius: '8px',
+                  '& .MuiOutlinedInput-root': {
+                    '& fieldset': { border: 'none' },
+                    '&:hover fieldset': { border: 'none' },
+                    '&.Mui-focused fieldset': { border: 'none' },
+                  },
+                }}
+              />
+            </Grid>
+            <Grid item xs={12} sm={3}>
+              <TextField
+                fullWidth
+                label="Amount"
+                value={item.amount.toFixed(2)}
+                disabled
+                variant="outlined"
+                sx={{
+                  background: 'rgba(255, 255, 255, 0.9)',
+                  borderRadius: '8px',
+                  '& .MuiOutlinedInput-root': {
+                    '& fieldset': { border: 'none' },
+                    '&:hover fieldset': { border: 'none' },
+                    '&.Mui-focused fieldset': { border: 'none' },
+                  },
+                }}
+              />
+            </Grid>
+          </Grid>
         ))}
         <Button
-          onClick={addLineItem}
-          variant="contained"
-          sx={{ backgroundColor: '#4CAF50', '&:hover': { backgroundColor: '#45a049' }, mt: 2 }}
-          startIcon={<AddIcon />}
-        >
-          Add Line
-        </Button>
-
-        <TextField
-          label="Notes - any relevant information not already covered"
-          name="notes"
-          value={formData.notes || ''}
-          onChange={handleChange}
-          multiline
-          rows={4}
+          component={motion.button}
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
           variant="outlined"
-          sx={{ bgcolor: '#374151', color: '#E5E7EB', mt: 2, '& .MuiInputBase-input': { color: '#E5E7EB' }, '& .MuiInputLabel-root': { color: '#A0AEC0' } }}
-        />
-
-        <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2, mt: 2, color: '#E5E7EB' }}>
-          <TextField
-            label="Subtotal"
-            name="subtotal"
-            type="number"
-            value={formData.subtotal}
-            onChange={handleChange}
-            disabled
-            variant="outlined"
-            sx={{ bgcolor: '#374151', color: '#E5E7EB', width: 150, '& .MuiInputBase-input': { color: '#E5E7EB' }, '& .MuiInputLabel-root': { color: '#A0AEC0' } }}
-          />
-          <TextField
-            label="Tax (%)"
-            name="tax"
-            type="number"
-            value={formData.tax}
-            onChange={handleChange}
-            variant="outlined"
-            sx={{ bgcolor: '#374151', color: '#E5E7EB', width: 150, '& .MuiInputBase-input': { color: '#E5E7EB' }, '& .MuiInputLabel-root': { color: '#A0AEC0' } }}
-          />
-          <TextField
-            label="Discount"
-            name="discount"
-            type="number"
-            value={formData.discount}
-            onChange={handleChange}
-            variant="outlined"
-            sx={{ bgcolor: '#374151', color: '#E5E7EB', width: 150, '& .MuiInputBase-input': { color: '#E5E7EB' }, '& .MuiInputLabel-root': { color: '#A0AEC0' } }}
-          />
-          <TextField
-            label="Shipping"
-            name="shipping"
-            type="number"
-            value={formData.shipping}
-            onChange={handleChange}
-            variant="outlined"
-            sx={{ bgcolor: '#374151', color: '#E5E7EB', width: 150, '& .MuiInputBase-input': { color: '#E5E7EB' }, '& .MuiInputLabel-root': { color: '#A0AEC0' } }}
-          />
-          <TextField
-            label="Total"
-            name="total"
-            type="number"
-            value={formData.total}
-            onChange={handleChange}
-            disabled
-            variant="outlined"
-            sx={{ bgcolor: '#374151', color: '#E5E7EB', width: 150, '& .MuiInputBase-input': { color: '#E5E7EB' }, '& .MuiInputLabel-root': { color: '#A0AEC0' } }}
-          />
-        </Box>
-
-        <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2, mt: 2, color: '#E5E7EB' }}>
-          <TextField
-            label="Amount Paid"
-            name="amountPaid"
-            type="number"
-            value={formData.amountPaid}
-            onChange={handleChange}
-            variant="outlined"
-            sx={{ bgcolor: '#374151', color: '#E5E7EB', width: 150, '& .MuiInputBase-input': { color: '#E5E7EB' }, '& .MuiInputLabel-root': { color: '#A0AEC0' } }}
-          />
-          <TextField
-            label="Balance Due"
-            name="balanceDue"
-            type="number"
-            value={formData.balanceDue}
-            onChange={handleChange}
-            disabled
-            variant="outlined"
-            sx={{ bgcolor: '#374151', color: '#E5E7EB', width: 150, '& .MuiInputBase-input': { color: '#E5E7EB' }, '& .MuiInputLabel-root': { color: '#A0AEC0' } }}
-          />
-        </Box>
-
-        <Button type="submit" variant="contained" sx={{ backgroundColor: '#4CAF50', '&:hover': { backgroundColor: '#45a049' }, mt: 4, width: '100%' }}>
-          Create
+          onClick={addItemRow}
+          sx={{
+            mt: 2,
+            borderColor: '#fff',
+            color: '#fff',
+            borderRadius: '8px',
+            padding: '8px 24px',
+            '&:hover': {
+              borderColor: '#fff',
+              background: 'rgba(255, 255, 255, 0.1)',
+            },
+          }}
+        >
+          + Add Item
         </Button>
       </Box>
-    </form>
+
+      <Box sx={{ maxWidth: 400, ml: 'auto' }}>
+        <Grid container spacing={2} sx={{ mb: 2 }}>
+          <Grid item xs={12}>
+            <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
+              Invoice # {editInvoice?.id || Date.now().toString().slice(-4)}
+            </Typography>
+            <Typography variant="body2" sx={{ color: 'rgba(255, 255, 255, 0.8)' }}>
+              Date: {new Date().toLocaleDateString('en-GB')}
+            </Typography>
+          </Grid>
+        </Grid>
+
+        <Grid container spacing={2}>
+          <Grid item xs={6}>
+            <Typography>Subtotal:</Typography>
+          </Grid>
+          <Grid item xs={6} sx={{ textAlign: 'right' }}>
+            <Typography>${subtotal.toFixed(2)}</Typography>
+          </Grid>
+
+          <Grid item xs={6}>
+            <TextField
+              label="Discount ($)"
+              type="number"
+              value={discount}
+              onChange={(e) => setDiscount(Number(e.target.value))}
+              size="small"
+              sx={{
+                background: 'rgba(255, 255, 255, 0.9)',
+                borderRadius: '8px',
+                '& .MuiOutlinedInput-root': {
+                  '& fieldset': { border: 'none' },
+                  '&:hover fieldset': { border: 'none' },
+                  '&.Mui-focused fieldset': { border: 'none' },
+                },
+              }}
+            />
+          </Grid>
+          <Grid item xs={6} sx={{ textAlign: 'right' }}>
+            <Typography>-${discount.toFixed(2)}</Typography>
+          </Grid>
+
+          <Grid item xs={6}>
+            <TextField
+              label="Tax (%)"
+              type="number"
+              value={tax}
+              onChange={(e) => setTax(Number(e.target.value))}
+              size="small"
+              sx={{
+                background: 'rgba(255, 255, 255, 0.9)',
+                borderRadius: '8px',
+                '& .MuiOutlinedInput-root': {
+                  '& fieldset': { border: 'none' },
+                  '&:hover fieldset': { border: 'none' },
+                  '&.Mui-focused fieldset': { border: 'none' },
+                },
+              }}
+            />
+          </Grid>
+          <Grid item xs={6} sx={{ textAlign: 'right' }}>
+            <Typography>${taxAmount.toFixed(2)}</Typography>
+          </Grid>
+
+          {formData.shippingAddress && (
+            <>
+              <Grid item xs={6}>
+                <TextField
+                  label="Shipping Charge ($)"
+                  type="number"
+                  value={shippingCharge}
+                  onChange={(e) => setShippingCharge(Number(e.target.value))}
+                  size="small"
+                  sx={{
+                    background: 'rgba(255, 255, 255, 0.9)',
+                    borderRadius: '8px',
+                    '& .MuiOutlinedInput-root': {
+                      '& fieldset': { border: 'none' },
+                      '&:hover fieldset': { border: 'none' },
+                      '&.Mui-focused fieldset': { border: 'none' },
+                    },
+                  }}
+                />
+              </Grid>
+              <Grid item xs={6} sx={{ textAlign: 'right' }}>
+                <Typography>${shippingCharge.toFixed(2)}</Typography>
+              </Grid>
+            </>
+          )}
+
+          <Grid item xs={12} sx={{ mt: 2 }}>
+            <Typography
+              variant="h5"
+              sx={{
+                fontWeight: 'bold',
+                textAlign: 'right',
+                textShadow: '1px 1px 3px rgba(0, 0, 0, 0.2)',
+              }}
+            >
+              Total: ${total.toFixed(2)}
+            </Typography>
+          </Grid>
+        </Grid>
+
+        <Box sx={{ textAlign: 'right', mt: 3 }}>
+          <Button
+            component={motion.button}
+            whileHover={{ scale: 1.05, boxShadow: '0px 8px 20px rgba(0, 0, 0, 0.3)' }}
+            whileTap={{ scale: 0.95 }}
+            variant="contained"
+            onClick={handleSave}
+            sx={{
+              background: 'linear-gradient(90deg, #F59E0B, #EF4444)',
+              color: '#fff',
+              fontWeight: 'bold',
+              padding: '10px 30px',
+              borderRadius: '50px',
+              boxShadow: '0px 4px 15px rgba(0, 0, 0, 0.2)',
+              '&:hover': {
+                background: 'linear-gradient(90deg, #D97706, #DC2626)',
+              },
+            }}
+          >
+            {editInvoice ? 'Update Invoice' : 'Create Invoice'}
+          </Button>
+        </Box>
+      </Box>
+    </Box>
   );
-}
+};
+
+export default InvoiceForm;

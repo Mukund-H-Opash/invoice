@@ -2,13 +2,13 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
+/* :root {
   --background: #0A0A0A;
   --foreground: #E5E7EB;
   --primary: #1E3A8A;
   --accent: #4CAF50;
   --error: #f44336;
-}
+} */
 
 @media (prefers-color-scheme: dark) {
   :root {

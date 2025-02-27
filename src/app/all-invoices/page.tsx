@@ -1,267 +1,282 @@
 // 'use client';
-// import { useEffect, useState } from 'react';
-// import { useDispatch } from 'react-redux';
-// import { Box, Typography, TextField, MenuItem, Button, List, ListItem, ListItemText, Snackbar, Alert, Grid } from '@mui/material';
-// import { setInvoices } from '../../redux/invoiceSlice';
-// import { fetchInvoices } from '../../utils/api';
-// import { Invoice } from '@/types';
-// import Link from 'next/link';
-// import Navbar from '../../components/Navbar';
+// import { useDispatch, useSelector } from 'react-redux';
+// import { setInvoices } from '@/redux/invoiceSlice';
+// import { fetchInvoices } from '@/utils/api';
+// import { useEffect } from 'react';
+// import { RootState } from '@/redux/store';
+// import { Box, Typography, Grid, Card, CardContent, Button } from '@mui/material';
+// import { motion } from 'framer-motion';
+// import { useRouter } from 'next/navigation';
+// import Navbar from '@/components/Navbar';
 
-// export default function AllInvoices() {
+// const AllInvoices = () => {
 //   const dispatch = useDispatch();
-//   const [invoices, setLocalInvoices] = useState<Invoice[]>([]);
-//   const [searchTerm, setSearchTerm] = useState('');
-//   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
-//   const [openSnackbar, setOpenSnackbar] = useState(false);
-//   const [snackbarMessage, setSnackbarMessage] = useState('');
+//   const router = useRouter();
+//   const invoices = useSelector((state: RootState) => state.invoices.invoices);
 
 //   useEffect(() => {
 //     const loadInvoices = async () => {
-//       try {
-//         const data = await fetchInvoices();
-//         console.log('Fetched invoices:', data); // Debug log to inspect data
-//         dispatch(setInvoices(data));
-//         setLocalInvoices(data);
-//       } catch (error) {
-//         console.error('Error fetching invoices:', error);
-//       }
+//       const data = await fetchInvoices();
+//       dispatch(setInvoices(data));
 //     };
 //     loadInvoices();
 //   }, [dispatch]);
 
-//   const calculateTotalAmount = (invoice: Invoice): number => {
-//     const subtotal = invoice.lineItems.reduce((sum, item) => sum + (item.quantity * item.rate), 0);
-//     const taxAmount = (subtotal * (invoice.tax / 100)) || 0;
-//     return subtotal + taxAmount + invoice.shipping - invoice.discount;
-//   };
-
-//   const filteredAndSortedInvoices = invoices
-//     .filter((invoice) => {
-//       // Safeguard: Check if name exists and is a string, fallback to empty string if not
-//       const name = invoice.name || '';
-//       return name.toLowerCase().includes(searchTerm.toLowerCase());
-//     })
-//     .sort((a, b) => (sortOrder === 'asc' ? calculateTotalAmount(a) - calculateTotalAmount(b) : calculateTotalAmount(b) - calculateTotalAmount(a)));
-
-//   const handleDeleteSuccess = () => {
-//     setSnackbarMessage('Invoice deleted successfully!');
-//     setOpenSnackbar(true);
-//   };
-
-//   const handleCloseSnackbar = () => setOpenSnackbar(false);
-
 //   return (
-//     <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', bgcolor: '#000000', p: 2 }}>
-//       <Navbar />
-//       <Box sx={{ mt: 2, p: 2, bgcolor: '#1F2937', borderRadius: 2, color: '#1F2937' }}>
-//         <Typography variant="h4" gutterBottom sx={{ color: '#FEF9E1' }}>
-//           All Invoices
+//     <>
+//     <Navbar/>
+//     <Box
+//       sx={{
+//         minHeight: 'calc(100vh - 64px)', // Adjust for navbar height
+//         background: 'linear-gradient(45deg, #1E3A8A, #7C3AED, #DB2777)', // Matching app theme
+//         p: 4,
+//       }}
+//     >
+//       <Typography
+//         variant="h3"
+//         sx={{
+//           fontWeight: 'bold',
+//           color: '#fff',
+//           textAlign: 'center',
+//           mb: 4,
+//           textShadow: '2px 2px 8px rgba(0, 0, 0, 0.3)',
+//         }}
+//       >
+//         All Invoices
+//       </Typography>
+
+//       {invoices.length === 0 ? (
+//         <Typography
+//           variant="h6"
+//           sx={{ color: '#E5E7EB', textAlign: 'center', mt: 4 }}
+//         >
+//           No invoices found. Create one to get started!
 //         </Typography>
-//         <Grid container spacing={2} sx={{ mb: 4 }}>
-//           <Grid item xs={12} md={6}>
-//             <TextField
-//               label="Search by Name"
-//               value={searchTerm}
-//               onChange={(e) => setSearchTerm(e.target.value)}
-//               sx={{
-//                 bgcolor: '#E5D0AC',
-//                 width: '100%',
-//                 '& .MuiInputBase-input': { color: '#000000' },
-//                 '& .MuiInputLabel-root': { color: '#F7F7F7' }, // Label color white
-//               }}
-//             />
-//           </Grid>
-//           <Grid item xs={12} md={6}>
-//             <TextField
-//               select
-//               label="Sort by Total Amount"
-//               value={sortOrder}
-//               onChange={(e) => setSortOrder(e.target.value as 'asc' | 'desc')}
-//               sx={{
-//                 bgcolor: '#E5D0AC',
-//                 width: '100%',
-//                 '& .MuiInputBase-input': { color: '#000000' },
-//                 '& .MuiInputLabel-root': { color: '#F7F7F7' }, // Label color white
-//               }}
-//             >
-//               <MenuItem value="asc" sx={{ color: '#000000' }}>Ascending</MenuItem>
-//               <MenuItem value="desc" sx={{ color: '#000000' }}>Descending</MenuItem>
-//             </TextField>
-//           </Grid>
-//         </Grid>
-//         <List>
-//           {filteredAndSortedInvoices.map((invoice) => (
-//             <ListItem key={invoice.id} sx={{ bgcolor: '#1F2937', mb: 1, borderRadius: 2 }}>
-//               <ListItemText
-//                 primary={`${invoice.name || 'Unnamed'} - $${calculateTotalAmount(invoice).toFixed(2)}`}
-//                 secondary={`Company: ${invoice.companyName || 'N/A'}, Date: ${new Date(invoice.date).toLocaleDateString()}`}
-//                 sx={{ color: '#F7F7F7' }}
-//               />
-//               <Button
-//                 component={Link}
-//                 href={`/invoice/${invoice.id}`}
-//                 sx={{ mr: 2, bgcolor: '#FFB22C', '&:hover': { bgcolor: '#' }, color: '#000000' }}
+//       ) : (
+//         <Grid container spacing={3}>
+//           {invoices.map((invoice) => (
+//             <Grid item xs={12} sm={6} md={4} key={invoice.id}>
+//               <Card
+//                 component={motion.div}
+//                 initial={{ opacity: 0, y: 20 }}
+//                 animate={{ opacity: 1, y: 0 }}
+//                 transition={{ duration: 0.5 }}
+//                 sx={{
+//                   background: 'rgba(255, 255, 255, 0.95)',
+//                   borderRadius: '12px',
+//                   boxShadow: '0px 6px 20px rgba(0, 0, 0, 0.15)',
+//                   overflow: 'hidden',
+//                   '&:hover': {
+//                     boxShadow: '0px 8px 25px rgba(0, 0, 0, 0.25)',
+//                   },
+//                 }}
 //               >
-//                 View
-//               </Button>
-//               <Button
-//                 component={Link}
-//                 href={`/create-invoice?edit=${invoice.id}`}
-//                 sx={{ mr: 2, bgcolor: '#FFB22C', '&:hover': { bgcolor: '#1F2937' }, color: '#000000' }}
-//               >
-//                 Edit
-//               </Button>
-//               <Button
-//                 onClick={handleDeleteSuccess}
-//                 sx={{ bgcolor: '#FF9D23', '&:hover': { bgcolor: '#1F2937' }, color: '#000000' }}
-//               >
-//                 Delete
-//               </Button>
-//             </ListItem>
+//                 <CardContent>
+//                   <Typography
+//                     variant="h6"
+//                     sx={{ fontWeight: 'bold', color: '#1E3A8A' }}
+//                   >
+//                     Invoice #{invoice.id}
+//                   </Typography>
+//                   <Typography sx={{ color: '#6B7280', mb: 1 }}>
+//                     Customer: {invoice.customerName}
+//                   </Typography>
+//                   <Typography sx={{ color: '#6B7280', mb: 1 }}>
+//                     Due Date: {invoice.dueDate}
+//                   </Typography>
+//                   <Typography sx={{ color: '#6B7280', mb: 2 }}>
+//                     Total: ${Number(invoice.amount).toFixed(2)}
+//                   </Typography>
+//                   <Button
+//                     component={motion.button}
+//                     whileHover={{ scale: 1.05 }}
+//                     whileTap={{ scale: 0.95 }}
+//                     variant="contained"
+//                     onClick={() => router.push(`/invoice/${invoice.id}`)}
+//                     sx={{
+//                       background: 'linear-gradient(90deg, #F59E0B, #EF4444)',
+//                       color: '#fff',
+//                       fontWeight: 'bold',
+//                       borderRadius: '8px',
+//                       padding: '8px 16px',
+//                       '&:hover': {
+//                         background: 'linear-gradient(90deg, #D97706, #DC2626)',
+//                       },
+//                     }}
+//                   >
+//                     View Details
+//                   </Button>
+//                 </CardContent>
+//               </Card>
+//             </Grid>
 //           ))}
-//         </List>
-//       </Box>
-//       <Snackbar open={openSnackbar} autoHideDuration={6000} onClose={handleCloseSnackbar}>
-//         <Alert severity="success" sx={{ bgcolor: '#1F2937', color: '#F7F7F7' }}>
-//           {snackbarMessage}
-//         </Alert>
-//       </Snackbar>
+//         </Grid>
+//       )}
 //     </Box>
+//     </>
+    
 //   );
-// }
+// };
 
-
+// export default AllInvoices;
 
 
 'use client';
-import { useEffect, useState } from 'react';
-import { useDispatch } from 'react-redux';
-import { Box, Typography, TextField, MenuItem, Button, List, ListItem, ListItemText, Snackbar, Alert, Grid } from '@mui/material';
-import { setInvoices } from '../../redux/invoiceSlice';
-import { fetchInvoices } from '../../utils/api';
-import { Invoice } from '@/types';
-import Link from 'next/link';
-import Navbar from '../../components/Navbar';
+import { useDispatch, useSelector } from 'react-redux';
+import { setInvoices, deleteInvoice } from '@/redux/invoiceSlice';
+import { fetchInvoices, deleteInvoice as deleteApiInvoice } from '@/utils/api';
+import { useEffect } from 'react';
+import { RootState } from '@/redux/store';
+import { Box, Typography, Grid, Card, CardContent, Button } from '@mui/material';
+import { motion } from 'framer-motion';
+import { useRouter } from 'next/navigation';
+import Navbar from '@/components/Navbar';
+import { toast } from 'react-toastify';
 
-export default function AllInvoices() {
+const AllInvoices = () => {
   const dispatch = useDispatch();
-  const [invoices, setLocalInvoices] = useState<Invoice[]>([]);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
-  const [openSnackbar, setOpenSnackbar] = useState(false);
-  const [snackbarMessage, setSnackbarMessage] = useState('');
+  const router = useRouter();
+  const invoices = useSelector((state: RootState) => state.invoices.invoices);
 
   useEffect(() => {
     const loadInvoices = async () => {
-      try {
-        const data = await fetchInvoices();
-        console.log('Fetched invoices:', data); // Debug log to inspect data
-        dispatch(setInvoices(data));
-        setLocalInvoices(data);
-      } catch (error) {
-        console.error('Error fetching invoices:', error);
-      }
+      const data = await fetchInvoices();
+      dispatch(setInvoices(data));
     };
     loadInvoices();
   }, [dispatch]);
 
-  const calculateTotalAmount = (invoice: Invoice): number => {
-    const subtotal = invoice.lineItems.reduce((sum, item) => sum + (item.quantity * item.rate), 0);
-    const taxAmount = (subtotal * (invoice.tax / 100)) || 0;
-    return subtotal + taxAmount + invoice.shipping - invoice.discount;
+  const handleDelete = async (id: string) => {
+    try {
+      const success = await deleteApiInvoice(id);
+      if (success) {
+        dispatch(deleteInvoice(id));
+        toast.success('Invoice deleted successfully!');
+      } else {
+        toast.error('Failed to delete invoice!');
+      }
+    } catch (error) {
+      toast.error('Error deleting invoice!');
+      console.error('Error deleting invoice:', error);
+    }
   };
-
-  const filteredAndSortedInvoices = invoices
-    .filter((invoice) => {
-      const name = invoice.name || '';
-      return name.toLowerCase().includes(searchTerm.toLowerCase());
-    })
-    .sort((a, b) => (sortOrder === 'asc' ? calculateTotalAmount(a) - calculateTotalAmount(b) : calculateTotalAmount(b) - calculateTotalAmount(a)));
-
-  const handleDeleteSuccess = () => {
-    setSnackbarMessage('Invoice deleted successfully!');
-    setOpenSnackbar(true);
-  };
-
-  const handleCloseSnackbar = () => setOpenSnackbar(false);
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', bgcolor: '#1F2937', p: 2 }}>
+    <>
       <Navbar />
-      <Box sx={{ mt: 2, p: 2, bgcolor: '#1F2937', borderRadius: 2, color: '#E5E7EB' }}>
-        <Typography variant="h4" gutterBottom sx={{ color: '#4CAF50' }}>
+      <Box
+        sx={{
+          minHeight: 'calc(100vh - 64px)',
+          background: 'linear-gradient(45deg, #1E3A8A, #7C3AED, #DB2777)',
+          p: 4,
+          borderRadius: '12px',
+        }}
+      >
+        <Typography
+          variant="h3"
+          sx={{
+            fontWeight: 'bold',
+            color: '#fff',
+            textAlign: 'center',
+            mb: 4,
+            textShadow: '2px 2px 8px rgba(0, 0, 0, 0.3)',
+          }}
+        >
           All Invoices
         </Typography>
-        <Grid container spacing={2} sx={{ mb: 4 }}>
-          <Grid item xs={12} md={6}>
-            <TextField
-              label="Search by Name"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              sx={{
-                bgcolor: '#374151',
-                width: '100%',
-                '& .MuiInputBase-input': { color: '#E5E7EB' },
-                '& .MuiInputLabel-root': { color: '#A0AEC0' }, // Label color from InvoiceForm
-              }}
-            />
+
+        {invoices.length === 0 ? (
+          <Typography
+            variant="h6"
+            sx={{ color: '#E5E7EB', textAlign: 'center', mt: 4 }}
+          >
+            No invoices found. Create one to get started!
+          </Typography>
+        ) : (
+          <Grid container spacing={3}>
+            {invoices.map((invoice) => (
+              <Grid item xs={12} sm={6} md={4} key={invoice.id}>
+                <Card
+                  component={motion.div}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5 }}
+                  sx={{
+                    background: 'rgba(255, 255, 255, 0.95)',
+                    borderRadius: '12px',
+                    boxShadow: '0px 6px 20px rgba(0, 0, 0, 0.15)',
+                    overflow: 'hidden',
+                    '&:hover': {
+                      boxShadow: '0px 8px 25px rgba(0, 0, 0, 0.25)',
+                    },
+                  }}
+                >
+                  <CardContent>
+                    <Typography
+                      variant="h6"
+                      sx={{ fontWeight: 'bold', color: '#1E3A8A' }}
+                    >
+                      Invoice #{invoice.id}
+                    </Typography>
+                    <Typography sx={{ color: '#6B7280', mb: 1 }}>
+                      Customer: {invoice.customerName}
+                    </Typography>
+                    <Typography sx={{ color: '#6B7280', mb: 1 }}>
+                      Due Date: {invoice.dueDate}
+                    </Typography>
+                    <Typography sx={{ color: '#6B7280', mb: 2 }}>
+                      Total: ${Number(invoice.amount).toFixed(2)}
+                    </Typography>
+                    <Box sx={{ display: 'flex', gap: 2 }}>
+                      <Button
+                        component={motion.button}
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        variant="contained"
+                        onClick={() => router.push(`/invoice/${invoice.id}`)}
+                        sx={{
+                          background: 'linear-gradient(90deg, #F59E0B, #EF4444)',
+                          color: '#fff',
+                          fontWeight: 'bold',
+                          borderRadius: '8px',
+                          padding: '8px 16px',
+                          '&:hover': {
+                            background: 'linear-gradient(90deg, #D97706, #DC2626)',
+                          },
+                        }}
+                      >
+                        View Details
+                      </Button>
+                      <Button
+                        component={motion.button}
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        variant="outlined"
+                        onClick={() => handleDelete(invoice.id)}
+                        sx={{
+                          borderColor: '#EF4444',
+                          color: '#EF4444',
+                          fontWeight: 'bold',
+                          borderRadius: '8px',
+                          padding: '8px 16px',
+                          '&:hover': {
+                            borderColor: '#DC2626',
+                            color: '#DC2626',
+                          },
+                        }}
+                      >
+                        Delete
+                      </Button>
+                    </Box>
+                  </CardContent>
+                </Card>
+              </Grid>
+            ))}
           </Grid>
-          <Grid item xs={12} md={6}>
-            <TextField
-              select
-              label="Sort by Total Amount"
-              value={sortOrder}
-              onChange={(e) => setSortOrder(e.target.value as 'asc' | 'desc')}
-              sx={{
-                bgcolor: '#374151',
-                width: '100%',
-                '& .MuiInputBase-input': { color: '#E5E7EB' },
-                '& .MuiInputLabel-root': { color: '#A0AEC0' }, // Label color from InvoiceForm
-              }}
-            >
-              <MenuItem value="asc" sx={{ color: '#E5E7EB' }}>Ascending</MenuItem>
-              <MenuItem value="desc" sx={{ color: '#E5E7EB' }}>Descending</MenuItem>
-            </TextField>
-          </Grid>
-        </Grid>
-        <List>
-          {filteredAndSortedInvoices.map((invoice) => (
-            <ListItem key={invoice.id} sx={{ bgcolor: '#374151', mb: 1, borderRadius: 2 }}>
-              <ListItemText
-                primary={`${invoice.name || 'Unnamed'} - $${calculateTotalAmount(invoice).toFixed(2)}`}
-                secondary={`Company: ${invoice.companyName || 'N/A'}, Date: ${new Date(invoice.date).toLocaleDateString()}`}
-                sx={{ color: '#E5E7EB' }}
-              />
-              <Button
-                component={Link}
-                href={`/invoice/${invoice.id}`}
-                sx={{ mr: 2, bgcolor: '#4CAF50', '&:hover': { bgcolor: '#45a049' }, color: '#E5E7EB' }}
-              >
-                View
-              </Button>
-              <Button
-                component={Link}
-                href={`/create-invoice?edit=${invoice.id}`}
-                sx={{ mr: 2, bgcolor: '#4CAF50', '&:hover': { bgcolor: '#45a049' }, color: '#E5E7EB' }}
-              >
-                Edit
-              </Button>
-              <Button
-                onClick={handleDeleteSuccess}
-                sx={{ bgcolor: '#f44336', '&:hover': { bgcolor: '#da190b' }, color: '#E5E7EB' }}
-              >
-                Delete
-              </Button>
-            </ListItem>
-          ))}
-        </List>
+        )}
       </Box>
-      <Snackbar open={openSnackbar} autoHideDuration={6000} onClose={handleCloseSnackbar}>
-        <Alert severity="success" sx={{ bgcolor: '#374151', color: '#E5E7EB' }}>
-          {snackbarMessage}
-        </Alert>
-      </Snackbar>
-    </Box>
+    </>
   );
-}
+};
+
+export default AllInvoices;
