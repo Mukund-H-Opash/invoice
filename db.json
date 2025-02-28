@@ -6,19 +6,19 @@
       "shippingAddress": "hjikhukjhyijbhbdjdjk",
       "items": [
         {
-          "item": "ASS",
-          "quantity": 10,
-          "rate": 10,
-          "amount": 100
+          "item": "5",
+          "quantity": 1,
+          "rate": 5,
+          "amount": 5
         }
       ],
-      "discount": 2,
-      "tax": 5,
-      "shippingCharge": 3,
-      "total": 106,
-      "amount": "106",
+      "discount": 0,
+      "tax": 0,
+      "shippingCharge": 0,
+      "total": 5,
+      "amount": "5",
       "dueDate": "27/02/2025",
-      "date": "27/02/2025"
+      "date": "28/02/2025"
     },
     {
       "id": "2276",
@@ -56,7 +56,7 @@
       "total": 8.05,
       "amount": "8.05",
       "dueDate": "27/02/2025",
-      "date": "27/02/2025"
+      "date": "26/02/2025"
     },
     {
       "id": "9133",
@@ -88,7 +88,33 @@
       "total": 112,
       "amount": "112",
       "dueDate": "27/02/2025",
-      "date": "27/02/2025"
+      "date": "26/02/2025"
+    },
+    {
+      "id": "7538",
+      "customerName": "sahil",
+      "shippingAddress": "",
+      "items": [
+        {
+          "item": "avx",
+          "quantity": 1,
+          "rate": 10,
+          "amount": 10
+        },
+        {
+          "item": "vefc",
+          "quantity": 2,
+          "rate": 50,
+          "amount": 100
+        }
+      ],
+      "discount": 10,
+      "tax": 0,
+      "shippingCharge": 0,
+      "total": 100,
+      "amount": "100",
+      "dueDate": "26/02/2025",
+      "date": "28/02/2025"
     }
   ]
 }
